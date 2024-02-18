@@ -1,5 +1,7 @@
 /*
-
+Device: RG353P
+OS: Recalbox
+SDL: 1.2
 typedef enum RG353P_ButtonType{
 	RG353P_Button_B,
 	RG353P_Button_A,
@@ -27,29 +29,69 @@ typedef enum RG353P_AxisType{
 	RG353P_Axis_Joystick_Right_Vertical,
 } RG353P_AxisType;
 
-Tes input joystick in RG35xx using SDL1.2
+==============================================
+Device: RG35XX
+OS: Koriki
+SDL: 1.2
+typedef enum RG35XX_ButtonType{
+	RG35XX_Button_A,
+	RG35XX_Button_B,
+	RG35XX_Button_X,
+	RG35XX_Button_Y,
+	RG35XX_Button_L1,
+	RG35XX_Button_R1,
+	RG35XX_Button_L2,
+	RG35XX_Button_R2,
+	RG35XX_Button_SELECT,
+	RG35XX_Button_START,
+	RG35XX_Button_MENU,
+	RG35XX_Button_VOLUME_UP,
+	RG35XX_Button_VOLUME_DOWN,
+	RG35XX_Button_UP,
+	RG35XX_Button_DOWN,
+	RG35XX_Button_LEFT,
+	RG35XX_Button_RIGHT
+} RG35XX_ButtonType;
 
-SDL_JoystickGetButton:
-	A = 0
-	B = 1
-	X = 2
-	Y = 3
-	POWER = 4
-	L1 = 5
-	R1 = 6
-	SELECT = 7
-	START = 8
-	MENU = 9
-	VOLUME+ = 10
-	VOLUME- = 11
+==============================================
+Device: Steamdeck
+OS: Steam OS
+SDL: 1.2
+typedef enum Steamdeck_ButtonType{
+	Steamdeck_Button_A,
+	Steamdeck_Button_B,
+	Steamdeck_Button_X,
+	Steamdeck_Button_Y,
+	Steamdeck_Button_L1,
+	Steamdeck_Button_R1,
+	Steamdeck_Button_SELECT,
+	Steamdeck_Button_START,
+	Steamdeck_Button_UNKNOWN,
+	Steamdeck_Button_L3,
+	Steamdeck_Button_R3
+} Steamdeck_ButtonType;
 
-SDL_JoystickGetHat:
-	UP = SDL_HAT_UP
-	DOWN = SDL_HAT_DOWN
-	LEFT = SDL_HAT_LEFT
-	RIGHT = SDL_HAT_RIGHT
+typedef enum Steamdeck_AxisType{
+	Steamdeck_Axis_Joystick_Left_Horizontal,
+	Steamdeck_Axis_Joystick_Left_Vertical,
+	Steamdeck_Axis_L2,
+	Steamdeck_Axis_Joystick_Right_Horizontal,
+	Steamdeck_Axis_Joystick_Right_Vertical,
+	Steamdeck_Axis_R2
+} Steamdeck_AxisType;
+
+typedef enum Steamdeck_HatType{
+	Steamdeck_Hat_Up = 1,
+	Steamdeck_Hat_Left = 2,
+	Steamdeck_Hat_Down = 4,
+	Steamdeck_Hat_Right = 8
+}
 */
+#ifdef SDL_2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #define TEXT_LENGTH 1024
 char msg_event_button[TEXT_LENGTH] = "Button's Event:";
@@ -93,12 +135,14 @@ void draw_string(SDL_Surface* surface, const char* text, int orig_x, int orig_y,
 int main(int argc, char* argv[]) {
 	if (SDL_Init(SDL_INIT_JOYSTICK|SDL_INIT_VIDEO) < 0) {
 		// Initialization failed
+		fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
 		return 1;
 	}
 
 	int numJoysticks = SDL_NumJoysticks();
 	if (numJoysticks < 1) {
 		// No joysticks are connected
+		fprintf(stderr, "SDL_NumJoysticks failed: %s\n", SDL_GetError());
 		SDL_Quit();
 		return 1;
 	}
@@ -107,23 +151,44 @@ int main(int argc, char* argv[]) {
 	SDL_Joystick* joystick = SDL_JoystickOpen(0);
 	if (!joystick) {
 		// Failed to open the joystick
+		fprintf(stderr, "SDL_JoystickOpen failed: %s\n", SDL_GetError());
 		SDL_Quit();
 		return 1;
 	}
 	SDL_JoystickEventState(SDL_ENABLE);
 
 	// Create a window
+#ifdef SDL_2
+	SDL_DisplayMode current;
+	SDL_GetCurrentDisplayMode(0, &current);
+	SDL_Window *Screen = SDL_CreateWindow("Test Joystick", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, current.w, current.h, SDL_WINDOW_FULLSCREEN);
+    if (!Screen) {
+		fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
+		return 1;
+	}
+	//Get window surface
+    SDL_Surface* screen = SDL_GetWindowSurface(Screen);
+#else
 	SDL_Surface* screen = SDL_SetVideoMode(640, 480, 16, SDL_FULLSCREEN|SDL_HWSURFACE);
+#endif	
 	if (!screen) {
-		fprintf(stderr, "SDL video mode set failed: %s\n", SDL_GetError());
+		fprintf(stderr, "SDL init scrren failed: %s\n", SDL_GetError());
 		return 1;
 	}
 
 	SDL_Surface* msg_joystick_info = SDL_CreateRGBSurface(SDL_SWSURFACE, 220, 60, 16, 0, 0, 0, 0);
 	SDL_Surface* msg_event = SDL_CreateRGBSurface(SDL_SWSURFACE, 300, 40, 16, 0, 0, 0, 0);
+	if (!msg_joystick_info || !msg_event) {
+		fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+		return 1;
+	}
 
 	SDL_FillRect(msg_joystick_info, NULL, SDL_MapRGB(msg_joystick_info->format, 0, 0, 0)); // Clear msg_joystick_info.
+#ifdef SDL_2	
+	draw_string(msg_joystick_info, SDL_JoystickName(joystick), 0, 0, SDL_MapRGB(msg_event->format, 0, 255, 0));
+#else
 	draw_string(msg_joystick_info, SDL_JoystickName(0), 0, 0, SDL_MapRGB(msg_event->format, 0, 255, 0));
+#endif
 	snprintf(msg_global, TEXT_LENGTH, " Num. Buttons = %d", SDL_JoystickNumButtons(joystick));
 	draw_string(msg_joystick_info, msg_global, 0, 10, SDL_MapRGB(msg_event->format, 0, 255, 0));
 	snprintf(msg_global, TEXT_LENGTH, " Num. Axes    = %d", SDL_JoystickNumAxes(joystick));
@@ -185,7 +250,11 @@ int main(int argc, char* argv[]) {
 		draw_string(msg_event, msg_event_key, 0, 30, SDL_MapRGB(msg_event->format, 255, 255, 255));
 		SDL_BlitSurface(msg_event, NULL, screen, &(SDL_Rect){200, 120, 0, 0});
 		SDL_BlitSurface(msg_joystick_info, NULL, screen, &(SDL_Rect){200, 60, 0, 0});
+#ifdef SDL_2
+		SDL_UpdateWindowSurface(Screen); //Update the surface
+#else
 		SDL_Flip(screen);
+#endif
 
 		if (SDL_JoystickGetButton(joystick, 6) && SDL_JoystickGetButton(joystick, 7)) quit = 1;
 	}
@@ -193,6 +262,9 @@ int main(int argc, char* argv[]) {
 	// Clean up
 	SDL_FreeSurface(msg_joystick_info);
 	SDL_FreeSurface(msg_event);
+#ifdef SDL_2	
+    SDL_DestroyWindow(Screen);
+#endif	
 	SDL_JoystickClose(joystick);
 	SDL_Quit();
 
