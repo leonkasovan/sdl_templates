@@ -1,15 +1,14 @@
 SDL_VERSION = 2
-TARGET_NAME = sdl_joystick
 
 CC = gcc
 CXX = g++
-EXE = $(TARGET_NAME)
+EXE = ""
 
 # CC = aarch64-buildroot-linux-gnu-gcc
-# EXE = $(TARGET_NAME)_arm64
+# EXE = "_arm64"
 
 # CC = arm-buildroot-linux-gnueabihf-gcc
-# EXE = $(TARGET_NAME)_arm
+# EXE = "_arm"
 
 SYSROOT = $(shell $(CC) -print-sysroot)
 PKGCONFIG = $(SYSROOT)/usr/bin/pkg-config
@@ -28,12 +27,11 @@ endif
 CFLAGS = -Wall -Wno-narrowing -O2 -fomit-frame-pointer $(SDL_CFLAGS)
 LIBS = -s $(SDL_LIBS)
 
-all:
-	$(CC) -o $(EXE) sdl_joystick.c $(CFLAGS) $(LIBS)
+sdl_joystick:
+	$(CC) -o $@$(EXE) sdl_joystick.c $(CFLAGS) $(LIBS)
 
-ex0:
-	$(CXX) -o $(EXE) sdl_template.cpp $(CFLAGS) $(LIBS)
+sdl_template:
+	$(CXX) -o $@$(EXE) sdl_template.cpp $(CFLAGS) $(LIBS)
 
-ex1:
-	$(CC) -o sdl_embedded_font sdl_embedded_font.c $(CFLAGS) $(LIBS)
-
+sdl_embedded_font:
+	$(CC) -o $@$(EXE) sdl_embedded_font.c $(CFLAGS) $(LIBS)
