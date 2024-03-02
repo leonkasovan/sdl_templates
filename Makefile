@@ -1,14 +1,14 @@
 SDL_VERSION = 2
 
-CC = gcc
-CXX = g++
-EXE = ""
+# CC = gcc
+# CXX = g++
+# EXE = ""
 
 # CC = aarch64-buildroot-linux-gnu-gcc
 # EXE = "_arm64"
 
-# CC = arm-buildroot-linux-gnueabihf-gcc
-# EXE = "_arm"
+CC = arm-buildroot-linux-gnueabihf-gcc
+EXE = "_arm"
 
 SYSROOT = $(shell $(CC) -print-sysroot)
 PKGCONFIG = $(SYSROOT)/usr/bin/pkg-config
@@ -21,6 +21,7 @@ ifeq ($(SDL_VERSION), 1)
 else
 	SDLCONFIG = $(SYSROOT)/usr/bin/sdl2-config
 	SDL_LIBS += -lSDL2 #-lSDL2_ttf
+	# SDL_LIBS += $(SYSROOT)/usr/lib/libSDL2.a -lm
 	SDL_CFLAGS += `$(SDLCONFIG) --cflags` -DSDL_2
 endif
 

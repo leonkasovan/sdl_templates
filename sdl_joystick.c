@@ -133,11 +133,25 @@ void draw_string(SDL_Surface* surface, const char* text, int orig_x, int orig_y,
 }
 
 int main(int argc, char* argv[]) {
+	puts("Available video drivers:");
+	int numVideoDrivers = SDL_GetNumVideoDrivers();
+	for (int i = 0; i < numVideoDrivers; i++) {
+		puts(SDL_GetVideoDriver(i));
+	}
+
+	puts("Available audio drivers:");
+	int numAudioDrivers = SDL_GetNumAudioDrivers();
+	for (int i = 0; i < numAudioDrivers; i++) {
+		puts(SDL_GetAudioDriver(i));
+	}
+
 	if (SDL_Init(SDL_INIT_JOYSTICK|SDL_INIT_VIDEO) < 0) {
 		// Initialization failed
 		fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
 		return 1;
 	}
+	printf("Currently using audio driver: %s\n", SDL_GetCurrentAudioDriver());
+	printf("Currently using video driver: %s\n", SDL_GetCurrentVideoDriver());
 
 	int numJoysticks = SDL_NumJoysticks();
 	if (numJoysticks < 1) {
@@ -176,29 +190,52 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	SDL_Surface* msg_joystick_info = SDL_CreateRGBSurface(SDL_SWSURFACE, 220, 60, 16, 0, 0, 0, 0);
+	SDL_Surface* msg_joystick_info = SDL_CreateRGBSurface(SDL_SWSURFACE, 300, 200, 16, 0, 0, 0, 0);
 	SDL_Surface* msg_event = SDL_CreateRGBSurface(SDL_SWSURFACE, 300, 40, 16, 0, 0, 0, 0);
 	if (!msg_joystick_info || !msg_event) {
 		fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
 		return 1;
 	}
 
+	int yy = 0;
+	SDL_version compiled;
+	SDL_version linked;
+	SDL_VERSION(&compiled);
+	SDL_GetVersion(&linked);
+
 	SDL_FillRect(msg_joystick_info, NULL, SDL_MapRGB(msg_joystick_info->format, 0, 0, 0)); // Clear msg_joystick_info.
+	snprintf(msg_global, TEXT_LENGTH, "We compiled against SDL version %u.%u.%u", compiled.major, compiled.minor, compiled.patch);
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
+	snprintf(msg_global, TEXT_LENGTH, "But we are linking against SDL version %u.%u.%u", linked.major, linked.minor, linked.patch);
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
 #ifdef SDL_2	
-	draw_string(msg_joystick_info, SDL_JoystickName(joystick), 0, 0, SDL_MapRGB(msg_event->format, 0, 255, 0));
+	draw_string(msg_joystick_info, SDL_JoystickName(joystick), 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
 #else
-	draw_string(msg_joystick_info, SDL_JoystickName(0), 0, 0, SDL_MapRGB(msg_event->format, 0, 255, 0));
+	draw_string(msg_joystick_info, SDL_JoystickName(0), 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
 #endif
 	snprintf(msg_global, TEXT_LENGTH, " Num. Buttons = %d", SDL_JoystickNumButtons(joystick));
-	draw_string(msg_joystick_info, msg_global, 0, 10, SDL_MapRGB(msg_event->format, 0, 255, 0));
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
 	snprintf(msg_global, TEXT_LENGTH, " Num. Axes    = %d", SDL_JoystickNumAxes(joystick));
-	draw_string(msg_joystick_info, msg_global, 0, 20, SDL_MapRGB(msg_event->format, 0, 255, 0));
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
 	snprintf(msg_global, TEXT_LENGTH, " Num. Hats    = %d", SDL_JoystickNumHats(joystick));
-	draw_string(msg_joystick_info, msg_global, 0, 30, SDL_MapRGB(msg_event->format, 0, 255, 0));
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
+	
+	snprintf(msg_global, TEXT_LENGTH, "Available video drivers: (using=%s)", SDL_GetCurrentVideoDriver());
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
+	for (int i = 0; i < numVideoDrivers; i++) {
+		draw_string(msg_joystick_info, SDL_GetVideoDriver(i), 5, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
+	}
+	snprintf(msg_global, TEXT_LENGTH, "Available audio drivers: (using=%s)", SDL_GetCurrentAudioDriver());
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
+	for (int i = 0; i < numAudioDrivers; i++) {
+		draw_string(msg_joystick_info, SDL_GetAudioDriver(i), 5, yy, SDL_MapRGB(msg_event->format, 0, 255, 0)); yy += 10;
+	}
+
 	snprintf(msg_global, TEXT_LENGTH, "Press button [6] and [7] to quit");
-	draw_string(msg_joystick_info, msg_global, 0, 40, SDL_MapRGB(msg_event->format, 255, 255, 0));
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 255, 255, 0)); yy += 10;
 	snprintf(msg_global, TEXT_LENGTH, "Press key [ESC] to quit");
-	draw_string(msg_joystick_info, msg_global, 0, 50, SDL_MapRGB(msg_event->format, 255, 255, 0));
+	draw_string(msg_joystick_info, msg_global, 0, yy, SDL_MapRGB(msg_event->format, 255, 255, 0)); yy += 10;
+	
 
 	// Main loop
 	int quit = 0;
@@ -248,8 +285,8 @@ int main(int argc, char* argv[]) {
 		draw_string(msg_event, msg_event_hat, 0, 10, SDL_MapRGB(msg_event->format, 255, 255, 255));
 		draw_string(msg_event, msg_event_axis, 0, 20, SDL_MapRGB(msg_event->format, 255, 255, 255));
 		draw_string(msg_event, msg_event_key, 0, 30, SDL_MapRGB(msg_event->format, 255, 255, 255));
-		SDL_BlitSurface(msg_event, NULL, screen, &(SDL_Rect){200, 120, 0, 0});
 		SDL_BlitSurface(msg_joystick_info, NULL, screen, &(SDL_Rect){200, 60, 0, 0});
+		SDL_BlitSurface(msg_event, NULL, screen, &(SDL_Rect){200, 250, 0, 0});
 #ifdef SDL_2
 		SDL_UpdateWindowSurface(Screen); //Update the surface
 #else
