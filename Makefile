@@ -1,4 +1,4 @@
-SDL_VERSION = 1
+SDL_VERSION = 2
 
 # CC = gcc
 # CXX = g++
@@ -27,6 +27,9 @@ endif
 
 CFLAGS = -Wall -Wno-narrowing -O2 -fomit-frame-pointer $(SDL_CFLAGS)
 LIBS = -s $(SDL_LIBS)
+
+sdl_audio: sdl_audio.c
+	$(CC) -o $@$(EXE) sdl_audio.c $(CFLAGS) $(LIBS)
 
 sdl_info: sdl_info.c
 	$(CC) -o $@$(EXE) sdl_info.c $(CFLAGS) $(LIBS)
