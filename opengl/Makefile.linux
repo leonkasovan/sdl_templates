@@ -1,8 +1,0 @@
-yellow_rect:
-	$(CC) draw_rec.c glad.c -o draw_rec -lSDL2main -lSDL2 -lGL
-
-load_png:
-	$(CC) load_png.c glad.c -o load_png -lSDL2main -lSDL2 -lSDL2_image -lGL
-
-load_png2:
-	$(CC) load_png2.c glad.c -o load_png2 -lSDL2main -lSDL2 -lSDL2_image -lGL

@@ -6,3 +6,5 @@ sdl_joystick
 sdl_joystick_*
 sdl_template
 sdl_template_*
+*.exe
+

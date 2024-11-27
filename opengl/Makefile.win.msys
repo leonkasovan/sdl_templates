@@ -1,0 +1,10 @@
+all: draw_rect load_png
+
+draw_rect: draw_rect.c
+	$(CC) draw_rect.c glad.c -o draw_rect -lmingw32 -lSDL2main -lSDL2 -lopengl32
+
+load_png:
+	$(CC) load_png.c glad.c -o load_png -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lopengl32
+
+clean:
+	rm draw_rect.exe load_png.exe
