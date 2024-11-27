@@ -16,6 +16,9 @@ Template SDL2 with OpenGL: load image.png and display with alpha in center
 #ifdef RPI4
 #define SHADER_VERSION "#version 310 es\n" \
 "precision mediump float;\n"
+#elif defined(RG353P)
+#define SHADER_VERSION "#version 320 es\n" \
+"precision mediump float;\n"
 #else
 #define SHADER_VERSION "#version 330 core\n"
 #endif

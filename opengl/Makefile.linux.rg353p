@@ -1,10 +1,10 @@
 all: draw_rect load_png
 
 draw_rect: draw_rect.c
-	$(CC) -DRG353P -DGL_GLEXT_PROTOTYPES draw_rect.c -o draw_rect -lSDL2main -lSDL2 -lGLESv2 -lmali
+	$(CC) -DRG353P draw_rect.c -o draw_rect -lSDL2main -lSDL2 -lmali
 
 load_png: load_png.c
-	$(CC) -DRG353P -DGL_GLEXT_PROTOTYPES load_png.c -o load_png -lSDL2main -lSDL2 -lSDL2_image -lGLESv2 -lmali
+	$(CC) -DRG353P load_png.c -o load_png -lSDL2main -lSDL2 -lSDL2_image -lmali
 
 clean:
 	rm draw_rect load_png
