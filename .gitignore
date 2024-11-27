@@ -7,4 +7,5 @@ sdl_joystick_*
 sdl_template
 sdl_template_*
 *.exe
-
+draw_rect
+load_png

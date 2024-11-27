@@ -5,15 +5,28 @@ Template SDL2 with OpenGL: draw yellow rectangle in blue background
 #include <SDL2/SDL.h>
 #ifdef __MINGW32__
 #include "glad.h"
+#elif defined(RG353P)
+#include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #endif
 #include <stdio.h>
 
+#ifdef RPI4
+#define SHADER_VERSION "#version 310 es\n" \
+"precision mediump float;\n"
+#else
+#define SHADER_VERSION "#version 330 core\n"
+#endif
+
+// Screen dimensions
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
 // Vertex Shader Source
 const char* vertexShaderSource =
-"#version 330 core\n"
+SHADER_VERSION
 "layout (location = 0) in vec2 aPos;\n"
 "\n"
 "void main() {\n"
@@ -22,7 +35,7 @@ const char* vertexShaderSource =
 
 // Fragment Shader Source
 const char* fragmentShaderSource =
-"#version 330 core\n"
+SHADER_VERSION
 "out vec4 FragColor;\n"
 "\n"
 "void main() {\n"
@@ -58,15 +71,25 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Set OpenGL attributes
+#ifdef RPI4
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#elif defined(RG353P)
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
 
 	SDL_Window* window = SDL_CreateWindow(
 		"Yellow Rectangle on Blue Background",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		640, 480,
+		SCREEN_WIDTH, SCREEN_HEIGHT,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
 	if (!window) {
@@ -95,7 +118,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 	// Set viewport
-	glViewport(0, 0, 640, 480);
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	// Vertex data for a rectangle
 	float vertices[] = {

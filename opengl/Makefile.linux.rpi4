@@ -1,0 +1,10 @@
+all: draw_rect load_png
+
+draw_rect: draw_rect.c
+	$(CC) -DRPI4 -DGL_GLEXT_PROTOTYPES draw_rect.c -o draw_rect -lSDL2main -lSDL2 -lGLESv2
+
+load_png: load_png.c
+	$(CC) -DRPI4 -DGL_GLEXT_PROTOTYPES load_png.c -o load_png -lSDL2main -lSDL2 -lSDL2_image -lGLESvs
+
+clean:
+	rm draw_rect load_png

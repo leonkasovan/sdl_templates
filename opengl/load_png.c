@@ -5,11 +5,20 @@ Template SDL2 with OpenGL: load image.png and display with alpha in center
 #include <SDL2/SDL_image.h>
 #ifdef __MINGW32__
 #include "glad.h"
+#elif defined(RG353P)
+#include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #endif
 #include <stdio.h>
+
+#ifdef RPI4
+#define SHADER_VERSION "#version 310 es\n" \
+"precision mediump float;\n"
+#else
+#define SHADER_VERSION "#version 330 core\n"
+#endif
 
 // Screen dimensions
 const int SCREEN_WIDTH = 640;
@@ -17,7 +26,7 @@ const int SCREEN_HEIGHT = 480;
 
 // Vertex and fragment shaders
 const char* vertexShaderSource =
-"#version 330 core\n"
+SHADER_VERSION
 "layout (location = 0) in vec2 aPos;\n"
 "layout (location = 1) in vec2 aTexCoord;\n"
 "\n"
@@ -29,7 +38,7 @@ const char* vertexShaderSource =
 "}\n";
 
 const char* fragmentShaderSource =
-"#version 330 core\n"
+SHADER_VERSION
 "out vec4 FragColor;\n"
 "in vec2 TexCoord;\n"
 "\n"
@@ -51,6 +60,21 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
 		return 1;
 	}
+
+	// Set OpenGL attributes
+#ifdef RPI4
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#elif defined(RG353P)
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
 
 	// Create window with OpenGL context
 	SDL_Window* window = SDL_CreateWindow("Image Display", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
